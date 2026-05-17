@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/random-book",
+      "dest": "/api/random-book.js"
+    }
+  ]
+}

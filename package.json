@@ -1,0 +1,9 @@
+{
+  "name": "books-api",
+  "version": "1.0.0",
+  "description": "Random book API with Supabase",
+  "main": "api/random-book.js",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0"
+  }
+}
