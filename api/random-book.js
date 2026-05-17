@@ -28,16 +28,18 @@ module.exports = async (req, res) => {
 
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const { data: books, error: countError } = await supabase
+  const { data: books, error: countError, count } = await supabase
     .from('books')
-    .select('id');
+    .select('id', { count: 'exact' });
 
   if (countError) {
     res.status(500).json({ error: countError.message });
     return;
   }
 
-  if (!books || books.length === 0) {
+  const total = count || (books ? books.length : 0);
+
+  if (!total || total === 0) {
     res.status(404).json({ error: 'No books found' });
     return;
   }
@@ -52,12 +54,23 @@ module.exports = async (req, res) => {
       return;
     }
     const rng = seededRandom(seed);
-    randomIndex = Math.floor(rng() * books.length);
+    randomIndex = Math.floor(rng() * total);
   } else {
-    randomIndex = Math.floor(Math.random() * books.length);
+    randomIndex = Math.floor(Math.random() * total);
   }
 
-  const selectedId = books[randomIndex].id;
+  const { data: selectedBook } = await supabase
+    .from('books')
+    .select('id')
+    .range(randomIndex, randomIndex)
+    .single();
+
+  if (!selectedBook) {
+    res.status(404).json({ error: 'Book not found at index' });
+    return;
+  }
+
+  const selectedId = selectedBook.id;
 
   const { data: book, error } = await supabase
     .from('books')
@@ -72,7 +85,7 @@ module.exports = async (req, res) => {
 
   res.status(200).json({
     seed: seedParam !== undefined ? parseInt(seedParam, 10) : null,
-    total: books.length,
+    total,
     book,
   });
 };
