@@ -11,6 +11,16 @@ function seededRandom(seed) {
   };
 }
 
+function stringToSeed(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -48,11 +58,7 @@ module.exports = async (req, res) => {
   let randomIndex;
 
   if (seedParam !== undefined) {
-    const seed = parseInt(seedParam, 10);
-    if (isNaN(seed)) {
-      res.status(400).json({ error: 'Seed must be a valid integer' });
-      return;
-    }
+    const seed = stringToSeed(seedParam);
     const rng = seededRandom(seed);
     randomIndex = Math.floor(rng() * total);
   } else {
@@ -84,7 +90,7 @@ module.exports = async (req, res) => {
   }
 
   res.status(200).json({
-    seed: seedParam !== undefined ? parseInt(seedParam, 10) : null,
+    seed: seedParam !== undefined ? seedParam : null,
     total,
     book,
   });
