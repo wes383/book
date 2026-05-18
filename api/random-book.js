@@ -5,8 +5,12 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 function seededRandom(seed) {
   let s = seed;
+  // 丢弃前10个值，充分打乱状态
+  for (let i = 0; i < 10; i++) {
+    s = (s * 16807) % 2147483647;
+  }
   return function() {
-    s = (s * 16807 + 0) % 2147483647;
+    s = (s * 16807) % 2147483647;
     return (s - 1) / 2147483646;
   };
 }
